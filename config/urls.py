@@ -7,6 +7,6 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls')),
     path('api/auth/token/', authtoken_views.obtain_auth_token, name='api_token_auth'),
     path('api/products/', include('shop.urls')),
-    path('api/cart/', include('cart.urls')),
+    path('api/', include('cart.urls')),
     path('api/orders/', include('orders.urls')),
 ]
