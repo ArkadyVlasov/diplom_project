@@ -1,0 +1,10 @@
+Django>=4.2
+djangorestframework
+django-filter
+djoser
+PyYAML
+psycopg2-binary
+celery
+redis
+django-celery-results
+gunicorn
