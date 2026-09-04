@@ -1,0 +1,25 @@
+shop: "Магазин электроники"
+categories:
+  - id: 1
+    name: "Смартфоны"
+  - id: 2
+    name: "Ноутбуки"
+goods:
+  - id: "p123"
+    name: "iPhone 15"
+    category: 1
+    quantity: 10
+    price: 999.99
+    price_rrc: 1099.99
+    parameters:
+      color: "Black"
+      storage: "128GB"
+  - id: "p456"
+    name: "MacBook Pro"
+    category: 2
+    quantity: 5
+    price: 1999.99
+    price_rrc: 2199.99
+    parameters:
+      ram: "16GB"
+      processor: "M3"
