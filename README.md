@@ -65,6 +65,22 @@ REST API-сервис для автоматизации закупок в роз
 9. Запустите Celery worker (в отдельном терминале):
    celery -A config worker --loglevel=info
 
+## Запуск через Docker
+
+Для запуска всех сервисов (Django, PostgreSQL, Redis, Celery) в контейнерах:
+
+1. **Установите Docker Desktop** с [официального сайта](https://www.docker.com/products/docker-desktop/).
+
+2. **В корневой папке проекта выполните:**
+   docker compose up --build
+
+После сборки приложение будет доступно по адресу http://localhost:8000.
+
+Для остановки контейнеров нажмите Ctrl+C, затем:
+   docker compose down
+
+Примечание: при использовании Docker база данных автоматически создаётся из миграций, а Celery worker запускается отдельным контейнером.
+
 ## Основные эндпоинты API
 
 | Метод | URL | Описание |
