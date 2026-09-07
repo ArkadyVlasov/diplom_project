@@ -5,18 +5,18 @@ Django settings for config project.
 import os
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-37j71+=@8adiggprodu=_qi!b(@afx1g9qcndqsxdt%n=($!e%')
-
-# SECURITY WARNING: don't run with debug turned on in production!
+# =================================================
+# БЕЗОПАСНОСТЬ И ОТЛАДКА
+# =================================================
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-...')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
-
-# Application definition
+# =================================================
+# ПРИЛОЖЕНИЯ
+# =================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -29,15 +29,18 @@ INSTALLED_APPS = [
     'django_filters',
     'djoser',
 
-    'users',
-    'shop',
-    'cart',
-    'orders',
-    'contacts',
+    'users',       # кастомная модель пользователя
+    'shop',        # товары, категории, магазины
+    'cart',        # корзина
+    'orders',      # заказы
+    'contacts',    # контакты (адреса доставки)
 ]
 
 AUTH_USER_MODEL = 'users.User'
 
+# =================================================
+# MIDDLEWARE И URL-КОНФИГУРАЦИЯ
+# =================================================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -67,9 +70,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
-
+# =================================================
+# БАЗА ДАННЫХ (по умолчанию SQLite)
+# =================================================
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3'),
@@ -81,35 +84,32 @@ DATABASES = {
     }
 }
 
-# Password validation
+# =================================================
+# ВАЛИДАЦИЯ ПАРОЛЕЙ
+# =================================================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {
-            'min_length': 8,
-        }
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
+# =================================================
+# ИНТЕРНАЦИОНАЛИЗАЦИЯ
+# =================================================
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# =================================================
+# СТАТИЧЕСКИЕ ФАЙЛЫ
+# =================================================
 STATIC_URL = 'static/'
 
-# REST Framework settings
+# =================================================
+# DRF НАСТРОЙКИ
+# =================================================
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
@@ -123,16 +123,24 @@ REST_FRAMEWORK = {
     ),
 }
 
-# Djoser settings
+# =================================================
+# DJOSER (регистрация, активация, сброс пароля)
+# =================================================
 DJOSER = {
     'USER_ID_FIELD': 'id',
     'LOGIN_FIELD': 'email',
     'USER_CREATE_PASSWORD_RETYPE': True,
-    'SET_PASSWORD_RETYPE': True,
-    'SEND_ACTIVATION_EMAIL': False,
+    'SEND_ACTIVATION_EMAIL': True,          # отправлять письмо для активации
+    'ACTIVATION_URL': 'activate/{uid}/{token}',  # URL для активации
+    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/{uid}/{token}',
+    'SERIALIZERS': {
+        'user_create': 'djoser.serializers.UserCreateSerializer',
+    },
 }
 
-# Email settings (console backend for development)
+# =================================================
+# EMAIL (консольный бэкенд для разработки)
+# =================================================
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
@@ -141,10 +149,12 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
 
-# Admin email for order notifications
+# Админ для уведомлений о заказах
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
 
-# Celery settings
+# =================================================
+# CELERY (асинхронные задачи)
+# =================================================
 CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']

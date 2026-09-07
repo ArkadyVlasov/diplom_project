@@ -7,10 +7,15 @@ from .models import Order, OrderItem
 from .serializers import OrderSerializer
 from cart.models import Cart
 from shop.models import ProductInfo
-from .tasks import send_order_confirmation, send_order_notification_to_admin  # импортируем задачи
+from contacts.models import Contact          # импорт модели контакта
+from .tasks import send_order_confirmation, send_order_notification_to_admin
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
+    """
+    Просмотр списка заказов пользователя и создание заказа (без обработки корзины).
+    Обычно используется для админских нужд.
+    """
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
@@ -23,8 +28,12 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
 class OrderConfirmView(views.APIView):
     """
-    Подтверждение заказа: создаёт заказ из корзины, списывает товары,
-    отправляет письма через Celery.
+    Подтверждение заказа:
+    - Создаёт заказ из товаров в корзине пользователя,
+    - Списывает остатки,
+    - Привязывает контакт доставки,
+    - Очищает корзину,
+    - Отправляет письма через Celery.
     """
     permission_classes = [IsAuthenticated]
 
@@ -39,19 +48,34 @@ class OrderConfirmView(views.APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Создаём заказ со статусом 'new'
+        # Получаем ID контакта из запроса
+        contact_id = request.data.get('contact')
+        if not contact_id:
+            return Response(
+                {"error": "Не указан ID контакта"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            contact = Contact.objects.get(id=contact_id, user=user)
+        except Contact.DoesNotExist:
+            return Response(
+                {"error": "Контакт не найден"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Создаём заказ со статусом 'new' и привязываем контакт
         order = Order.objects.create(
             user=user,
             status='new',
-            address=request.data.get('address', '')
+            contact=contact
         )
 
         total = 0
         for cart_item in cart_items:
             product_info = cart_item.product_info
-            # Проверяем остаток
             if product_info.quantity < cart_item.quantity:
-                # Если не хватает, откатываем транзакцию
+                # Откат транзакции при нехватке товара
                 raise ValueError(f"Недостаточно товара {product_info.product.name}")
 
             # Создаём позицию заказа
@@ -91,7 +115,7 @@ class OrderStatusUpdateView(generics.UpdateAPIView):
     queryset = Order.objects.all()
 
     def perform_update(self, serializer):
-        # Проверяем, что текущий пользователь является поставщиком
-        if self.request.user.user_type != 'supplier' and not self.request.user.is_staff:
+        # Проверяем, что пользователь – поставщик или администратор
+        if self.request.user.type != 'shop' and not self.request.user.is_staff:
             raise PermissionError("Только поставщики могут менять статус заказа")
         serializer.save()
