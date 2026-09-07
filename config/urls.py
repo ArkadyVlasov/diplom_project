@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/', include('cart.urls')),
     path('api/orders/', include('orders.urls')),
     path('api/', include('contacts.urls')),   # <-- добавлено
+    path('api/', include('partner.urls')),
 ]

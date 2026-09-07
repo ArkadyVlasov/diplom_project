@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'cart',        # корзина
     'orders',      # заказы
     'contacts',    # контакты (адреса доставки)
+    'partner',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -139,18 +140,25 @@ DJOSER = {
 }
 
 # =================================================
-# EMAIL (консольный бэкенд для разработки)
+# НАСТРОЙКИ EMAIL (реальная отправка через SMTP)
 # =================================================
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
 
-# Админ для уведомлений о заказах
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
+# Загружаем переменные из .env
+from dotenv import load_dotenv
+load_dotenv()
+
+# Email settings (для разработки — письма выводятся в консоль)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.yandex.ru')      # или smtp.gmail.com
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 465))              # 465 для SSL, 587 для TLS
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'True') == 'True'
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# Адрес администратора для уведомлений о заказах
+ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@example.com')
 
 # =================================================
 # CELERY (асинхронные задачи)
