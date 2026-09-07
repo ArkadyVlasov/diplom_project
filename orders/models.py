@@ -1,10 +1,10 @@
 from django.db import models
 from django.conf import settings
-from shop.models import ProductInfo
+from contacts.models import Contact
 
 class Order(models.Model):
     """
-    Заказ пользователя.
+    Заказ пользователя. Связан с контактом (адресом доставки).
     """
     STATUS_CHOICES = (
         ('basket', 'Корзина'),
@@ -17,7 +17,14 @@ class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders')
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='basket')
-    address = models.TextField(blank=True, verbose_name='Адрес доставки')
+    contact = models.ForeignKey(
+        Contact,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='orders',
+        verbose_name='Контакт для доставки'
+    )
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name='Общая сумма')
 
     class Meta:
@@ -33,7 +40,7 @@ class OrderItem(models.Model):
     Позиция заказа (фиксирует цену и количество на момент заказа).
     """
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
-    product_info = models.ForeignKey(ProductInfo, on_delete=models.CASCADE, related_name='order_items')
+    product_info = models.ForeignKey('shop.ProductInfo', on_delete=models.CASCADE, related_name='order_items')
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Цена на момент заказа')
 
