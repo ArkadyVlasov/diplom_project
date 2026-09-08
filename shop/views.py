@@ -13,3 +13,12 @@ class ProductListView(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
     filterset_class = ProductFilter   # подключаем фильтр
+    
+class ProductDetailView(generics.RetrieveAPIView):
+    """
+    Получение детальной информации о товаре по ID.
+    Доступно без авторизации.
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = [AllowAny]

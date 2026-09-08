@@ -8,6 +8,8 @@ from shop.models import Shop
 from orders.models import Order, OrderItem
 from .serializers import ShopStateSerializer, PartnerOrderSerializer
 from shop.tasks import import_products_task  # задача Celery для импорта
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 
 
 class PartnerUpdateView(views.APIView):
@@ -29,6 +31,16 @@ class PartnerUpdateView(views.APIView):
         if not url:
             return Response(
                 {"error": "Не указан URL файла прайса"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Валидация URL
+        validator = URLValidator()
+        try:
+            validator(url)
+        except ValidationError as e:
+            return Response(
+                {"error": f"Некорректный формат URL: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

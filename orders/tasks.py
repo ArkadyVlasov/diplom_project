@@ -14,7 +14,15 @@ def send_order_confirmation(order_id):
 def send_order_notification_to_admin(order_id):
     from .models import Order
     order = Order.objects.get(id=order_id)
+    
+    # Используем order.contact (вместо order.address)
+    address = str(order.contact) if order.contact else 'Адрес не указан'
+    
     subject = f'Новый заказ №{order.id}'
-    message = f'Поступил новый заказ №{order.id} от {order.user.username}\nСумма: {order.total}\nАдрес: {order.address}'
+    message = (
+        f'Поступил новый заказ №{order.id} от {order.user.username}\n'
+        f'Сумма: {order.total}\n'
+        f'Адрес: {address}'
+    )
     admin_email = getattr(settings, 'ADMIN_EMAIL', 'admin@example.com')
     send_mail(subject, message, settings.EMAIL_HOST_USER, [admin_email])

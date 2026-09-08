@@ -17,7 +17,7 @@ class Command(BaseCommand):
         user_id = options['user_id']
 
         try:
-            user = User.objects.get(id=user_id, user_type='supplier')
+            user = User.objects.get(id=user_id, type='shop')
         except User.DoesNotExist:
             self.stderr.write(self.style.ERROR(f'Supplier with id {user_id} not found'))
             return

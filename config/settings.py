@@ -135,7 +135,9 @@ DJOSER = {
     'ACTIVATION_URL': 'activate/{uid}/{token}',  # URL для активации
     'PASSWORD_RESET_CONFIRM_URL': 'password/reset/{uid}/{token}',
     'SERIALIZERS': {
-        'user_create': 'djoser.serializers.UserCreateSerializer',
+        'user_create': 'users.serializers.UserCreateSerializer',
+        'user': 'users.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializer',
     },
 }
 
